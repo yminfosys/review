@@ -38,6 +38,7 @@ function searchProperty(){
 }
 
 
+
 function requestProperty(){
     $("#propList").html('');
     $("#searchProp").css({"display":"none"});
@@ -60,17 +61,62 @@ function addpropertylease(propertyID){
 }
 
 
-function propertyFeedback(propertyID){
+
+function propertyFeedback(propertyID,name,tenantID){
 $("#box2").css({"display":"none"})
 $("#box3").css({"display":"block"})
+$("#updatebtn").html(' <button onclick="updateFeedback(\''+name+'\', \''+tenantID+'\' ,\''+propertyID+'\')"  type="button" class="btn btn-default">Submit</button>')
+$.post('/users/propertyAndfeedbackDetails',{propertyID:propertyID}, async function(data){
+
+  if(data.property){
+    $("#proprtyName").text(data.property.name);
+    $("#propertyImg").attr('src',data.property.imgMain);
+     for (let i = 0; i <= data.property.rating; i++) {
+      $("#propertyStar"+i+"").addClass("yellow");
+      }
+      $("#oldFeedback").html('');
+      data.feedbac.forEach(val => {
+      $("#oldFeedback").append('<li class="list-group-item"><h4>'+val.ratingname+':</h4> '+val.rating+' <i class="fa fa-star" aria-hidden="true"></i>\
+      <br>Msg: '+val.detailsrating+' </li>')
+      });
+    }
+
+    
+
+})
+
+
+
+}
+
+function updateFeedback(name,tenantID,propertyID){
+var selectrdRating=$("#selectrdRating").val();
+var detailsrating=$("#inputfeedback").val();
+if(selectrdRating){
+  $.post('/users/updatePropertyFeedback',{
+    name:name,
+    tenantID:tenantID,
+    propertyID:propertyID,
+    ratingby:"Tenant",
+    rating:selectrdRating,
+    detailsrating:detailsrating
+  
+  },function(data){
+  if(data){
+    $("#box2").css({"display":"block"})
+    $("#box3").css({"display":"none"})
+  }
+  })
+}else{
+  alert("Select Rating")
+}
 
 
 
 }
 
 $( document ).ready(function() {
-    let stars = Array.from(document.querySelectorAll("i"));
-    let abc=stars.length - 7;
+    let stars = Array.from(document.querySelectorAll(".abc"));
     stars.forEach((element) => {
       element.addEventListener("click", (e) => {
         rate(element);
@@ -86,15 +132,15 @@ $( document ).ready(function() {
         el.classList.remove("selected");
       });
       selectedRating = stars.indexOf(element);
-      $("#selectrdRating").val(selectedRating - abc)
+      $("#selectrdRating").val(selectedRating+1)
       for (let i = 0; i <= selectedRating; i++) {
         stars[i].classList.add("selected");
       }
     }
     
-    for (let i = 0; i <= 3; i++) {
-        $("#propertyStar"+i+"").addClass("yellow");
-      }
+    // for (let i = 0; i <= 3; i++) {
+    //     $("#propertyStar"+i+"").addClass("yellow");
+    //   }
 })
 
 

@@ -58,6 +58,8 @@ const propertySchema = new mongoose.Schema({
     impOp2:String,
     impOp3:String,
     impAdsProof:String,
+    totalrating:{type:Number, default:0},
+    ratingcount:{type:Number, default:0},
     rating:{type:Number, default:0},
     date: { type: Date, default: Date.now }
 });
@@ -90,19 +92,19 @@ const propertyrequestSchema = new mongoose.Schema({
 var propertyrequestmodul = mongoose.model('requestproperty', propertyrequestSchema);
 
 
-const ratingSchema = new mongoose.Schema({ 
-    landlordID:Number,
-    landlordName:String,
+const feedbacSchema = new mongoose.Schema({ 
+    ratingby:String,
+    ratingname:String,
+    detailsrating:String,
     propertyID:Number,
-    postCode:String,
-    doorNo:String,
-    address:String,
-    country:String,
-    rating:Number,
+    tenantID:Number,
+    landlordID:Number,
+    rating:{type:Number, default:0},
     date: { type: Date, default: Date.now }
 });
 
-var ratingmodul = mongoose.model('rating', ratingSchema);
+
+var feedbacmodul = mongoose.model('feedbac', feedbacSchema);
 
 
 const leaseSchema = new mongoose.Schema({ 
@@ -122,7 +124,7 @@ const leaseSchema = new mongoose.Schema({
     impOp1:String,
     impOp2:String,
     impOp3:String,
-    rating:String,
+    rating:{type:Number, default:0},
     date: { type: Date, default: Date.now }
 
 });
@@ -137,6 +139,6 @@ module.exports={
     counter:countermodul,
     property:propertymodul,
     propertyrequest:propertyrequestmodul,
-    rating:ratingmodul,
+    feedbac:feedbacmodul,
     lease:leasemodul
 }

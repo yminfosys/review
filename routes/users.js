@@ -161,6 +161,7 @@ router.post('/loginTenant', async function(req, res, next) {
 })
 
 
+
 router.post('/loginLandlord', async function(req, res, next) {
   console.log(req.body)
   await dbCon.connectDB();
@@ -212,6 +213,7 @@ router.get('/reg', async function(req, res, next) {
         }
       }
 });
+
 
 
 
@@ -481,7 +483,101 @@ router.post('/findMyTenant', async function(req, res, next) {
     
   await dbCon.closeDB();
   res.json(lease)
+
+  
 })
+
+
+router.post('/propertyAndfeedbackDetails', async function(req, res, next) {
+  await dbCon.connectDB();
+  const property=await database.property.findOne({propertyID:req.body.propertyID});
+
+  const feedbac=await database.feedbac.find({propertyID:req.body.propertyID}).sort({_id: -1}).limit(20);
+    
+  await dbCon.closeDB();
+  res.send({property:property,feedbac:feedbac})
+})
+
+
+router.post('/updatePropertyFeedback', async function(req, res, next) {
+  await dbCon.connectDB();
+
+  const checkfeedbac= await database.feedbac.findOne({propertyID:req.body.propertyID,tenantID:req.body.tenantID});
+
+  if(checkfeedbac){
+    /////Update Feed back/////
+    const feedbac=await database.feedbac.findOneAndUpdate({propertyID:req.body.propertyID,tenantID:req.body.tenantID},{
+      detailsrating:req.body.detailsrating,
+      rating:req.body.rating,
+    });
+  }else{
+    const feedbac=await database.feedbac({
+      ratingby:req.body.ratingby,
+      ratingname:req.body.name,
+      rating:req.body.rating,
+      detailsrating:req.body.detailsrating,
+      propertyID:req.body.propertyID,
+      tenantID:req.body.tenantID,
+      
+  })
+
+  await feedbac.save();
+  }
+
+  
+
+   const property=await database.property.findOne({propertyID:req.body.propertyID});
+   var newtotalrating=0;
+   var newratingcount=0;
+        if(property.totalrating){
+          newtotalrating = Number(property.totalrating)+ Number(req.body.rating);
+        }else{
+          newtotalrating=Number(req.body.rating);
+        }
+        if(property.ratingcount){
+          newratingcount = Number(property.ratingcount)+1;
+        }else{
+          newratingcount=1;
+        }
+
+        
+        var newRating =  Number(newtotalrating) / Number(newratingcount);
+        
+
+        //console.log("totalRating:",newtotalRating, "count:",newratingcount)
+
+        const prop=await database.property.findOneAndUpdate({propertyID:req.body.propertyID},{
+          totalrating:newtotalrating,
+          ratingcount:newratingcount,
+          rating:newRating
+        });
+
+
+        const lease=await database.lease.findOneAndUpdate({propertyID:req.body.propertyID,tenantID:req.body.tenantID},{
+          rating:newRating
+        });
+
+        console.log(lease)
+    
+      await dbCon.closeDB();
+      res.send("ok");
+  
+
+      
+
+
+  
+  // res.send({property:property,feedbac:feedbac})
+})
+
+
+
+
+
+
+
+
+
 
 
 
